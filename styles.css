@@ -1,0 +1,53 @@
+/**
+ * Created by John on 28/05/14.
+ */
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+svg {
+    float: left;
+}
+
+#legend {
+    float: left;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+#legend > ul {
+    list-style-type: none;
+    padding: 0px;
+    margin: 5px;
+}
+
+#legend  h4 {
+    margin: 5px;
+}
+
+body > h1 {
+    text-decoration-color: dodgerblue;
+}
+
+.legend_div {
+    width:20px;
+    height:20px;
+    float:left;
+    margin-right:10px;
+}
+
+.float_left {
+    float: left;
+}
+
+* {
+    font: arial,sans-serif;
+}
