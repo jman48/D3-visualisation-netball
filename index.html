@@ -1,0 +1,90 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>D3 Test</title>
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="d3.v3.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="FileParser.js"></script>
+    <script src="Drawing.js"></script>
+
+</head>
+<body>
+<h1>Games</h1>
+<script type="text/javascript">
+    var games = invoke();
+    var teams = getTeams();
+    var selectedTeams = [];
+
+    $('document').ready(function(){
+        initalise();
+        testChart();
+        inflateOptions(teams)
+
+        //--------- Event listners ------------
+        $("#tran").click(function() {
+            update();
+        });
+
+        //Add new team and draw
+        $("#show_button").click(function() {
+            var selected = $("#teams_select").val();
+            if(selectedTeams.indexOf(selected) < 0) {
+                selectedTeams.push($("#teams_select").val());
+            }
+            drawMain(selectedTeams);
+        });
+
+        //Add new team and draw
+        $("#clear_button").click(function() {
+            var selected = $("#teams_select").val();
+            selectedTeams = [];
+            selectedTeams.push(selected);
+            drawMain(selectedTeams);
+        });
+
+    });
+
+    function inflateOptions(teams) {
+        for (var i = 0; i < teams.length; i++) {
+            var a = $("#teams_select");
+            $("#teams_select").append($("<option></option>")
+                    .attr("value", teams[i].name)
+                    .text(teams[i].name));
+        }
+    }
+
+</script>
+
+<input id="tran" type="button" name="click" value="Start"/>
+</br>
+
+<!-- The main chart. First section of the page -->
+<div id="main">
+    <div id="selector">
+        <select id="teams_select">
+            <option value="All teams">All teams</option>
+        </select>
+        <input id="add_button" type="button" value="Add" />
+        </br>
+        <input id="show_button" type="button" value="Show" />
+        <input id="clear_button" type="button" value="Clear" />
+    </div>
+    <div id="svg_content" class="float_left"> </div>
+    <div id="legend">
+        <h4>Legend</h4>
+        <p>
+            Size:</br>
+            Large - Home Game</br>
+            Small - Away Game
+        </p>
+        <p>
+            Win | Lose
+        </p>
+        <ul id="legend_list">
+        </ul>
+    </div>
+    </br>
+</div>
+</body>
+</html>
