@@ -9,7 +9,7 @@
 var domain = "http://johnarmstrong.co";
 var address = "/SWEN303/";
 var fileNames = ["2008-Table1.csv", "2009-Table1.csv", "2010-Table1.csv", "2011-Table1.csv", "2012-Table1.csv", "2013-Table1.csv"];
-var fileName = ["2010-Table1.csv", "2009-Table1.csv"];
+var fileName = ["2010-Table1.csv", "2008-Table1.csv"];
 var countryTeamMapFile = "Teams.csv";
 var fileLocations =  setFileLocations(domain, address, fileName);
 
