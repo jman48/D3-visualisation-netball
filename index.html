@@ -1,10 +1,18 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>D3 Test</title>
-    <link href="styles.css" rel="stylesheet" type="text/css">
+
+    <!-- Libraries i used -->
     <script type="text/javascript" src="d3.v3.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+    <!-- My libraries -->
+    <link href="styles.css" rel="stylesheet" type="text/css">
     <script src="FileParser.js"></script>
     <script src="Drawing.js"></script>
 </head>
@@ -35,11 +43,11 @@
 
             //Add new team and draw
             $("#clear_button").click(function() {
-                var selected = $("#teams_select").val();
                 selectedTeams = [];
-                selectedTeams.push(selected);
-                drawMain(selectedTeams);
+                clear();
             });
+
+            $("")
 
         });
 
@@ -54,37 +62,64 @@
 
     </script>
 
-    <div class="row" >
-        <!-- The main chart. First section of the page -->
-        <div id="main">
-            <h1>Games</h1>
-            <div id="selector">
-                <select id="teams_select">
-                    <option value="All teams">All teams</option>
-                </select>
-                </br>
-                <input id="show_button" type="button" value="Show" />
-                <input id="clear_button" type="button" value="Clear" />
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="http://www.anz-championship.com/">
+                    <img id="logo" src="./images/anz_champ_logo.png" alt="ANZ championship Logo" />
+                </a>
             </div>
-            <div id="svg_content_main" class="float_left"> </div>
-            <div id="legend">
-                <h4>Legend</h4>
-                <p>
-                    Size:</br>
-                    Large - Home Game</br>
-                    Small - Away Game
-                </p>
-                <p>
-                    Win | Lose
-                </p>
-                <ul id="legend_list">
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="#row_main">Bubbles</a></li>
+                    <li><a href="#row_donut">Donuts</a></li>
+                    <li><a href="#about">About</a></li>
                 </ul>
             </div>
+        </div>
+    </nav>
+    
+
+    <div class="row_sec" id="row_main" >
+        <!-- The main chart. First section of the page -->
+        <div id="main">
+            <div id="main_head">
+                <h1>Games</h1>
+                <div id="selectors" class="float_left">
+                    <select id="teams_select">
+                        <option value="All teams">All teams</option>
+                    </select>
+                    </br>
+                    <input id="show_button" type="button" value="Show" />
+                    <input id="clear_button" type="button" value="Clear" />
+                 </div>
+                <div id="legend">
+                    <h4>Legend</h4>
+                    <p>
+                        Size:</br>
+                        Large - Home Game</br>
+                        Small - Away Game
+                    </p>
+                    <div id="color_legend">
+                        <p>Win | Lose</p>
+                        <ul id="legend_list">
+                        </ul>
+                    </div>
+                </div>
+            </div>
             </br>
+            <div id="svg_content_main" class="float_left"> </div>
         </div> <!-- Main end -->
     </div> <!-- Row end -->
 
-    <div class="row">
+    <div class="row_sec" id="row_donut">
         <div id="donuts">
             <h1>Home vs Away games won</h1>
             <div id="svg_content_donut">
@@ -93,8 +128,16 @@
         </div>
     </div>
 
+
+   <div id="footer">
+       <div class="container">
+           <p class="text-muted">
+               &copy; John Armstrong 2014
+           </p>
+       </div>
+   </div>
 <!-- Hidden tool tip. sssshhhh! -->
-    <div id="tooltip" class="hidden">
+    <div id="tooltip_d3" class="hidden">
         <p><strong><span id="title">Important Label Heading</span></strong></p>
         <p><span id="value">1</span></p>
     </div>

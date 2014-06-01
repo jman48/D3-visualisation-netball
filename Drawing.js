@@ -1,8 +1,8 @@
 /**
  * Created by John on 25/05/14.
  */
-var width  = 1600;
-var height = 1000;
+var width  = 1200;
+var height = 800;
 var padding = 30;
 var svg;
 var games;
@@ -18,12 +18,28 @@ var yAxis;
 Create an empty chart with x and y axis
  */
 function initialize() {
-    height = height - $("#selector").height();
+    //Set hieght and width of chart
+    height = height - $("#main_head").height();
+    width = width - $("#legend").width();
 
     svg = d3.select("#svg_content_main")
         .append("svg")
-        .attr("width", width-100)
+        .attr("width", width)
         .attr("height", height);
+
+    emptyChart();
+
+    circles = svg.selectAll("circle")
+        .data(cleanData(games))
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) { return xScale(d.round); })
+        .attr("cy", function(d) { return yScale(d.score[0]); })
+        .attr("r", 0)
+        .attr("fill", "red");
+}
+
+function emptyChart() {
 
     yScale = d3.scale.linear()
         .domain([30, findMaxHomeScore(games)])
@@ -73,15 +89,11 @@ function initialize() {
         .attr("y", height)
         .attr("x", 1100)
         .text("Finals");
+}
 
-    circles = svg.selectAll("circle")
-        .data(cleanData(games))
-        .enter()
-        .append("circle")
-        .attr("cx", function(d) { return xScale(d.round); })
-        .attr("cy", function(d) { return yScale(d.score[0]); })
-        .attr("r", 0)
-        .attr("fill", "red");
+function clear() {
+    svg.text("");
+    emptyChart();
 }
 
 /*
@@ -267,6 +279,7 @@ function drawPie(teams, svg, radius) {
         return;
     }
 
+    var thickness = 35;
     var svgDonut = svg;
     var team = teams.pop();
 
@@ -286,7 +299,7 @@ function drawPie(teams, svg, radius) {
       .attr("transform", "translate(" + width/2 + ", " + height/2 + ")");
 
     var arc = d3.svg.arc()
-      .innerRadius(radius - 45)
+      .innerRadius(radius - thickness)
       .outerRadius(radius)
 
     var pie = d3.layout.pie()
@@ -328,31 +341,10 @@ function drawPie(teams, svg, radius) {
         .attr("fill", function(d) {
             return color(d.data[1]);
         });
+    
 
-    /*
-    arcs.append("text")
-        .style("font-size",18)
-        .attr("dy",function(d,i){return 20;})
-        .attr("alignment-baseline","middle")
-        .append("textPath")
-        //.attr("textLength",function(d,i){return 90-i*5 ;})
-        .attr("xlink:href",function(d,i){return "#s"+teams.length+i;})
-        //.attr("startOffset",function(d,i){return 3/20;})
-        .text(function(d){return team.name;})
-
-
-    arcs.append("text")
-        .attr("transform", function (d) {
-            return "translate( " + arc.centroid(d) + ")";
-        })
-        .attr("text-anchor", "middle")
-        .attr("fill", "white")
-        .text(function(d) {
-            return d.data;
-        })
-*/
     //Recursively make a call to this method to draw all inner circles until no teams left
-    drawPie(teams, svgDonut, (radius - 45));
+    drawPie(teams, svgDonut, (radius - thickness));
  }
 
 function getBetterData(team) {
