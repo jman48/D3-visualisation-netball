@@ -457,7 +457,8 @@ function drawStackedBar() {
                 .text(d.label);
           d3.select("#tooltip_d3")
                 .select("#country")
-                .text(
+                .text(github
+
                     d.country);
         })
         .on("mouseout", function() {
