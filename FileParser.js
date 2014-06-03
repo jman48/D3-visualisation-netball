@@ -9,24 +9,21 @@
 var domain = "http://johnarmstrong.co";
 var address = "/SWEN303/";
 var fileNames = ["2008-Table1.csv", "2009-Table1.csv", "2010-Table1.csv", "2011-Table1.csv", "2012-Table1.csv", "2013-Table1.csv"];
-var fileName = ["2010-Table1.csv", "2008-Table1.csv"];
+var fileName = [ "2010-Table1.csv"];
+var years = ["2008", "2009", "2010", "2011", "2012", "2013"];
 var countryTeamMapFile = "Teams.csv";
-var fileLocations =  setFileLocations(domain, address, fileName);
-
-var teams = [];
-var games = [];
+var fileLocations =  setFileLocations(domain, address, fileNames);
 
 /*
 Gets and sets all the data from the files. Must be called first to set data.
  */
-function invoke() {
+function invoke(seasonYear) {
     getTeamCountrys(domain, address, countryTeamMapFile);
 
     //Loop through files then get and set all data
     for (var i = 0; i < fileLocations.length; i++) {
-        setData(fileLocations[i], games);
+        setData(fileLocations[i], seasonYear, years[i]);
     }
-    return cleanData(games);
 }
 
 function getTeamCountrys(domain, address, countryTeamMapFile) {
@@ -55,17 +52,19 @@ function readTeamCountry(data) {
 }
 
 /*
- Use ajax to get data to create and store games
+ Use ajax to get data to create and store season
  */
-function setData(fileLocation, games) {
+function setData(fileLocation, seasonYear, year) {
     $.ajax({
         url: fileLocation,
         async: false,
         success: function (data){
             var file = parseData(data);
+            var seasonTmp = [];
             for(var i = 0; i < file.length; i++) {
-                games.push(new Game(file[i]));
+                seasonTmp.push(new Game(file[i], year));
             }
+            seasonYear.push([year, seasonTmp]);
         }
     });
 }
@@ -104,17 +103,17 @@ function parseData(data) {
                 for (var j = 0; j < entries.length; j++) {
                     dataParts.push(entries[j]);
                 }
+                fileDataArray.push(dataParts);
             } else {
                 //BYES in data
             }
-            fileDataArray.push(dataParts);
         }
     }
     return fileDataArray;
 }
 
 function checkBye(entry) {
-    return entry[1].indexOf('byes') >= 0;
+    return (entry[1].indexOf('byes') >= 0 || entry[1].indexOf('BYES') >= 0);
 }
 
 //TODO: Change
@@ -126,83 +125,4 @@ function cleanData(games) {
         }
     }
     return valid;
-}
-
-
-//--------------------------------- Class and Class functions ----------------------------
-
-/*
- Define a class type for easy access
- */
-function Game(data) {
-    this.round = data[0];
-    this.date = new Date(data[1]);
-    this.homeTeam = findTeam(data[2]);
-    this.score = data[3].replace(/ /g, '').split("–");
-    this.awayTeam = findTeam(data[4]);
-    this.venue = data[5];
-
-    //Special case if venue contains a , in it. Happens because we split by ,
-    if( data[6] ) {
-        this.venue += data[6];
-    }
-}
-
-Game.prototype.toString = function() {
-    return "Round: " + this.round + " | Date: " + this.date + " | Home Team: " + this.homeTeam + " | Score " + this.score
-        + " | Away Team: " + this.awayTeam + " | Venue: " + this.venue;
-}
-
-function Team(name, country, colorWin, colorLose) {
-    this.name = name;
-    this.country = country;
-    this.colorWin = colorWin;
-    this.colorLose = colorLose;
-}
-
-//------------------------------------ Useful functions for classes above --------------------------------
-
-/*
-Find the maximum home team score in a collection of games
- */
-function findMaxHomeScore(games) {
-    var max = 0;
-    for (var i = 0; i <  games.length; i++) {
-        if(games[i].score[0] > max) {
-            max = games[i].score[0];
-        }
-    }
-    return max;
-}
-
-/*
- Find the maximum away team score in a collection of games
- */
-function findMaxAwayScore(games) {
-    var max = 0;
-    for (var i = 0; i <  games.length; i++) {
-        if(games[i].score[1] > max) {
-            max = games[i].score[1];
-        }
-    }
-    return max;
-}
-
-/*
- Find team object by string 'name'
- */
-function findTeam(teamName) {
-    for(var i = 0; i < teams.length; i++) {
-        if(teams[i].name == teamName) {
-            return teams[i];
-        }
-    }
-    return false;
-}
-
-/*
-Get all teams
- */
-function getTeams() {
-    return teams;
 }

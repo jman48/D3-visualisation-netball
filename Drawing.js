@@ -1,11 +1,7 @@
-/**
- * Created by John on 25/05/14.
- */
 var width  = 1200;
 var height = 800;
 var padding = 30;
 var svg;
-var games;
 var circles;
 var yScale;
 var xScale;
@@ -18,9 +14,8 @@ var yAxis;
 Create an empty chart with x and y axis
  */
 function initialize() {
-    //Set hieght and width of chart
+    //Set hieght of chart
     height = height - $("#main_head").height();
-    width = width - $("#legend").width();
 
     svg = d3.select("#svg_content_main")
         .append("svg")
@@ -29,20 +24,12 @@ function initialize() {
 
     emptyChart();
 
-    circles = svg.selectAll("circle")
-        .data(cleanData(games))
-        .enter()
-        .append("circle")
-        .attr("cx", function(d) { return xScale(d.round); })
-        .attr("cy", function(d) { return yScale(d.score[0]); })
-        .attr("r", 0)
-        .attr("fill", "red");
 }
 
 function emptyChart() {
 
     yScale = d3.scale.linear()
-        .domain([30, findMaxHomeScore(games)])
+        .domain([30, findMaxHomeScore(getSeason())])
         .range([height - padding, padding]);
     xScale = d3.scale.linear()
         .domain([0, 17])
@@ -93,6 +80,7 @@ function emptyChart() {
 
 function clear() {
     svg.text("");
+    $('#legend_list').empty();
     emptyChart();
 }
 
@@ -102,11 +90,12 @@ Get data foreach team and then draw chart
 function drawMain(options) {
 
     var data = getData(options);
+
     updateLegend(options);
     svg.text("");
 
     yScale = d3.scale.linear()
-        .domain([30, getHighScore(data)])
+        .domain([getLowScoreDF(data), getHighScoreDF(data)])
         .range([height - padding, padding]);
     xScale = d3.scale.linear()
         .domain([0, 17])
@@ -181,6 +170,42 @@ function drawMain(options) {
             else {
                 return d.team.colorLose;
             }
+        })
+        .attr("opacity", 0.6)
+        .on("mouseover", function(d) {
+            d3.select("#tooltip_d3")
+                .style("left", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + "px")
+                .style("opacity", 1);
+            d3.select("#tooltip_d3")
+                .select("#title")
+                .text(d.team.name);
+            d3.select("#tooltip_d3")
+                .select("#round")
+                .text("Round: " + d.round);
+            d3.select("#tooltip_d3")
+                .select("#value")
+                .text("Score: " + d.score);
+            d3.select("#tooltip_d3")
+                .select("#result")
+                .text(function() {
+                    if(d.result) {
+                        return "Result: Won";
+                    }
+                    else {
+                        return "Result: Lost";
+                    }
+            });
+            d3.select("#tooltip_d3")
+                .select("#country")
+                .text(d.team.country);
+            d3.select("#tooltip_d3")
+                .select("#year")
+                .text(d.year);
+        })
+        .on("mouseout", function() {
+            d3.select("#tooltip_d3")
+                .style("opacity", 0);
         });
 
 
@@ -201,85 +226,13 @@ function updateLegend(options) {
     }
 }
 
-/*
-Go through all the games and collect certain data. Store in an array of dataFormat objects for easy handling
- */
-function getData(options) {
-    var data = [];
-
-    if(options == null ||options[0] == "All teams") {
-        for(var i = 0; i < games.length; i++) {
-            for(var j = 0; j < teams.length; j ++) {
-                if(games[i].homeTeam.name == teams[j].name) {
-                    //collect for home team
-                    data.push(new dataFormat(games[i], true))
-                }
-                else if(games[i].awayTeam.name == teams[j].name) {
-                    //collect for away team
-                    data.push(new dataFormat(games[i], false))
-                }
-            }
-        }
-    }
-    else {
-        for(var gameNo = 0; gameNo < games.length; gameNo++) {
-            for(var team = 0; team < options.length; team++) {
-                if(games[gameNo].homeTeam.name == options[team]) {
-                    //collect for home team
-                    data.push(new dataFormat(games[gameNo], true))
-                }
-                else if(games[gameNo].awayTeam.name == options[team]) {
-                    //collect for away team
-                    data.push(new dataFormat(games[gameNo], false))
-                }
-            }
-        }
-    }
-    return data;
-}
-
-/*
-A class to make handling of data easier.
- */
-function dataFormat(game, home) {
-    this.round = game.round;
-    if(home) {
-        this.team = game.homeTeam;
-        this.score = game.score[0];
-        this.result = game.score[0] > game.score[1];
-        this.location = "Home";
-    }
-    else {
-        this.team = game.awayTeam;
-        this.score = game.score[1];
-        this.result = game.score[1] > game.score[0];
-        this.location = "Away";
-    }
-}
-
-/*
-Get high score from a collection of dataFormat objects
- */
-function getHighScore(dataFormatCol) {
-    var max = 0;
-
-    for(var i = 0; i < dataFormatCol.length; i++) {
-        if(dataFormatCol[i].score > max) {
-            max = dataFormatCol[i].score;
-        }
-    }
-    return max;
-}
-
-
-//----------------- Pie chart related stuff ---------------------------------//
 function drawPie(teams, svg, radius) {
-    //Exit recursive function if on more teams left to display
+    //Exit recursive function if no more teams left to display
     if(teams.length < 1) {
         return;
     }
 
-    var thickness = 35;
+    var thickness = 30;
     var svgDonut = svg;
     var team = teams.pop();
 
@@ -290,13 +243,13 @@ function drawPie(teams, svg, radius) {
             .attr("height", height);
     }
 
-    var data = getBetterData(team);
+    var data = getPieData(team);
 
     var color = d3.scale.ordinal()
         .range([team.colorWin, team.colorLose]);
 
     var group = svgDonut.append("g")
-      .attr("transform", "translate(" + width/2 + ", " + height/2 + ")");
+      .attr("transform", "translate(" + width/2 + ", " + (height - 100)/2 + ")");
 
     var arc = d3.svg.arc()
       .innerRadius(radius - thickness)
@@ -309,37 +262,40 @@ function drawPie(teams, svg, radius) {
 
     var arcs = group.selectAll(".arc")
         .data(pie(data))
-        .enter()
-        .append("g")
-        .attr("class", "arc")
-        .on("mouseover", function(d){
-            //Get spelling right!
-            var text = " games";
-            if(d.data[1] == 1) {
-                text = " game";
-            }
+            .enter()
+                .append("g")
+                .attr("class", "arc")
+                .on("mouseover", function(d) {
+                    //Get spelling right
+                    var text = " games";
+                    if(d.data[1] == 1) {
+                        text = " game";
+                    }
 
-            d3.select("#tooltip")
-                .style("left", d3.event.pageX + "px")
-                .style("top", d3.event.pageY + "px")
-                .style("opacity", 1)
-                .select("#value")
-                .text(d.data + text);
-            d3.select("#tooltip")
-                .select("#title")
-                .text(team.name);
+                    d3.select("#tooltip_d3")
+                        .style("left", d3.event.pageX + "px")
+                        .style("top", d3.event.pageY + "px")
+                        .style("opacity", 1)
+                        .select("#value")
+                        .text(d.data + text);
+                    d3.select("#tooltip_d3")
+                        .select("#title")
+                        .text(team.name);
+                    d3.select("#tooltip_d3")
+                        .select("#country")
+                        .text(team.country);
         })
-        .on("mouseout", function() {
+                .on("mouseout", function() {
             // Hide the tooltip
-            d3.select("#tooltip")
+            d3.select("#tooltip_d3")
                 .style("opacity", 0);
         });
 
     arcs.append("path")
         .attr("d", arc)
         .attr("id", function(d,i){return "s"+teams.length+i;})
-        .attr("fill", function(d) {
-            return color(d.data[1]);
+        .attr("fill", function(d, i) {
+            return color(d.data[i]);
         });
     
 
@@ -347,22 +303,194 @@ function drawPie(teams, svg, radius) {
     drawPie(teams, svgDonut, (radius - thickness));
  }
 
-function getBetterData(team) {
-    var data = getData()
-    var home = 0;
-    var away = 0;
+function reDrawPie(teams, svg, radius) {
+    var svg = d3.select("svg").text("");
+    drawPie(teams, svg, radius);
+}
 
-    for(var gameNo = 0; gameNo < games.length; gameNo++) {
-            if(games[gameNo].homeTeam.name == team.name) {
-                //collect for home team
-                if(games[gameNo].score[0] > games[gameNo].score[1])
-                    home += 1;
-            }
-            else if(games[gameNo].awayTeam.name == team.name) {
-                //collect for away team
-                if(games[gameNo].score[1] > games[gameNo].score[0])
-                    away += 1;
-            }
+function drawBubbleChart(team, svg) {
+    var data = getBubbleData(team);
+    var svg = svg;
+
+    var scale = d3.scale.linear();
+    scale.domain([0, highBubbleData(data)])
+        .range([0, 30]);
+
+
+    var diameter = 750,
+        format = d3.format(",d"),
+        color = d3.scale.category20c();
+
+    var bubble = d3.layout.pack()
+        .sort(null)
+        .size([diameter, diameter])
+        .padding(1.5);
+
+    if(svg == null) {
+        svg = d3.select("#bubble_chart_svg").append("svg")
+                .attr("width", diameter)
+                .attr("height", diameter)
+                .attr("class", "bubble");
     }
-    return [["Home", home], ["Away", away]];
+
+    var node = svg.selectAll(".node")
+        .data(bubble.nodes({children: data})
+            .filter(function(d) { return !d.children; }))
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")";
+        })
+        .on("mouseover", function(d) {
+            d3.select("#tooltip_d3")
+                .style("left", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + "px")
+                .style("opacity", 1)
+                .select("#value")
+                .text("Total Points: " + d.value);
+            d3.select("#tooltip_d3")
+                .select("#title")
+                .text(d.venue);
+            d3.select("#tooltip_d3")
+                .select("#country")
+                .text(d.team);
+        })
+        .on("mouseout", function() {
+            // Hide the tooltip
+            d3.select("#tooltip_d3")
+                .style("opacity", 0);
+        });
+
+
+
+    node.append("circle")
+        .attr("r", function(d) {
+            return d.r;
+        })
+        .style("fill", function(d) { return color("red"); });
+
+    node.append("text")
+        .attr("dy", ".3em")
+        .style("text-anchor", "middle")
+        .text(function(d) {
+            var sub = d.venue.substring(0, d.r / 5);
+            if(sub.length < d.venue.length) {
+                sub += "...";
+            }
+            return sub;
+        });
+}
+
+function reDrawBubble(team) {
+    var svg = d3.select("svg").text("");
+    drawBubbleChart(team, svg);
+}
+
+function drawStackedBar() {
+    var data = analyse(seasonYear);
+    var labels = [];
+    for(var i = 0; i < data.length; i++) {
+        labels.push(data[i].team1.name + " vs " + data[i].team2.name);
+    }
+
+    var margin = { top: 30, right: 20, bottom: 10, left: 40 },
+        width = 1000 - margin.left - margin.right,
+        height = 700 - margin.top - margin.bottom;
+
+    var z = d3.scale.ordinal().range(["darkblue", "lightblue"]);
+
+    data = data.map(function (d,i) {
+        var columnTotal = d.total;
+        var dn = [];
+        dn[0] = { x: i, y: (d.team1.wins / d.total), y0: 0, label: d.team1.team.name,
+            value: "Wins: " + d.team1.wins, country: d.team1.team.country, color: d.team1.team.colorWin};
+        dn[1] = { x: i, y: (d.team2.wins / d.total), y0: (d.team1.wins / d.total), label: d.team2.team.name,
+            value: "Wins: " + d.team2.wins, country: d.team2.team.country, color: d.team2.team.colorWin}
+        return dn;
+    });
+
+    var y = d3.scale.linear()
+        .domain([0,1])
+        .range([height, 0]);
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .tickFormat(d3.format(".0%"));
+
+    var x = d3.scale.ordinal()
+        .rangeRoundBands([0, width], .05)
+        .domain(data.map(function(d) {
+            return d[0].x}));
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var svgSt = d3.select("#bar_chart_svg").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    var valgroup = svgSt.selectAll("g.valgroup")
+        .data(data)
+        .enter().append("svg:g")
+        .attr("class", "valgroup");
+
+    var rectSt = valgroup.selectAll("rect")
+        .data(function (d) {
+            return d; })
+        .enter()
+        .append("rect")
+        .on("mouseover", function(d) {
+            d3.select("#tooltip_d3")
+                .style("left", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + "px")
+                .style("opacity", 1)
+                .select("#value")
+                .text(
+                    d.value);
+            d3.select("#tooltip_d3")
+                .select("#title")
+                .text(d.label);
+          d3.select("#tooltip_d3")
+                .select("#country")
+                .text(
+                    d.country);
+        })
+        .on("mouseout", function() {
+            d3.select("#tooltip_d3")
+                .style("opacity", 0);
+        })
+        .attr("x", function (d) {
+            return x(d.x); })
+        .attr("width",
+            x.rangeBand())
+        .attr("y", function (d) {
+            return y(d.y0 + d.y); })
+        .attr("height", function (d) {
+            return y(d.y0) - y(d.y0 + d.y); })
+        .style("fill", function (d) {
+            return d.color; });
+    //TODO: maybe change color
+
+    svgSt.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", "-.55em")
+        .attr("transform", "rotate(-90)");
+
+    svgSt.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em");
 }
