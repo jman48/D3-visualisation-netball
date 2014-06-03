@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Venues</title>
+
+    <!-- Libraries i used -->
+    <script type="text/javascript" src="d3.v3.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+    <!-- My libraries -->
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <script src="FileParser.js"></script>
+    <script src="Drawing.js"></script>
+    <script src="DataCollection.js"></script>
+    <script src="Classes.js"></script>
+    <script src="VenueData.js"></script>
+</head>
+<body>
+
+<script>
+    $('document').ready(function(){
+        invoke(seasonYear);
+        selectedYear = ["2008", "2009", "2010", "2011", "2012", "2013"];
+        inflateOptions(teams);
+        drawBubbleChart(findTeam($("#teams_select").val()));
+
+        $("#teams_select").change(function() {
+            var selected = $("#teams_select").val();
+            reDrawBubble(findTeam(selected));
+        })
+
+        function inflateOptions(teams) {
+            for (var i = 0; i < teams.length; i++) {
+                var a = $("#teams_select");
+                $("#teams_select").append($("<option></option>")
+                        .attr("value", teams[i].name)
+                        .text(teams[i].name));
+            }
+        }
+    });
+</script>
+
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://www.anz-championship.com/">
+                <img id="logo" src="./images/anz_champ_logo.png" alt="ANZ championship Logo" />
+            </a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="./index.html">Overview</a></li>
+                <li><a href="./donut.html">Home Advantage</a></li>
+                <li class="active"><a href="">Venues</a></li>
+                <li><a href="./teams.html">Teams</a></li>
+                <li><a href="./about.html">About</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="row_sec" id="row_main" >
+    <h1 class="centre">Performance by venue</h1>
+    <select id="teams_select">
+    </select>
+    <div id="bubble_chart_svg">
+
+    </div>
+</div>
+
+<div id="footer">
+    <div class="container">
+        <p class="text-muted">
+            &copy; John Armstrong 2014
+        </p>
+    </div>
+</div>
+
+<!-- Hidden tool tip. sssshhhh! -->
+<div id="tooltip_d3" class="hidden_tool">
+    <p><strong><span id="title">Important Label Heading</span></strong></p>
+    <p><span id="value">1</span></p>
+    <p><span id="country">country</span></p>
+</div>
+
+</body>
+</html>

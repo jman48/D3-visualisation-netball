@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home Advantage</title>
+
+    <!-- Libraries i used -->
+    <script type="text/javascript" src="d3.v3.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+    <!-- My libraries -->
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <script src="FileParser.js"></script>
+    <script src="Drawing.js"></script>
+    <script src="DataCollection.js"></script>
+    <script src="Classes.js"></script>
+</head>
+<body>
+
+    <script>
+        $('document').ready(function(){
+            invoke(seasonYear);
+            selectedYear = ["2008", "2009", "2010", "2011", "2012", "2013"];
+            drawPie(teams.slice(0), null, ((height - 130) / 2));
+            inflateOptions(seasonYear);
+
+            $('#year_select').on('change', function() {
+                var selected = $("#year_select").val();
+                if(selected == "All Seasons") {
+                    selectedYear = ["2008", "2009", "2010", "2011", "2012", "2013"];
+                }
+                else {
+                    setSelectedYear(selected);
+                }
+                reDrawPie(teams.slice(0), null, ((height - 130) / 2));
+            })
+        });
+
+        function inflateOptions(years) {
+            for (var i = 0; i < years.length; i++) {
+                var a = $("#year_select");
+                $("#year_select").append($("<option></option>")
+                        .attr("value", years[i][0])
+                        .text(years[i][0]));
+            }
+        }
+    </script>
+
+    <!-- Nav bar -->
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://www.anz-championship.com/">
+                <img id="logo" src="./images/anz_champ_logo.png" alt="ANZ championship Logo" />
+            </a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="./index.html">Overview</a></li>
+                <li class="active"><a href="" >Home Advantage</a></li>
+                <li><a href="./venues.html">Venues</a></li>
+                <li><a href="./teams.html">Teams</a></li>
+                <li><a href="./about.html">About</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <!-- Content -->
+    <div class="row_sec" id="row_donut">
+        <div id="donuts" class="centre">
+            <h1 class="centre">Home vs Away wins</h1>
+            <select id="year_select">
+                <option value="All teams">All seasons</option>
+            </select>
+            <div id="svg_content_donut">
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer">
+        <div class="container">
+            <p class="text-muted">&copy; John Armstrong 2014</p>
+        </div>
+    </div>
+
+    <!-- Hidden tool tip. sssshhhh! -->
+    <div id="tooltip_d3" class="hidden_tool">
+        <p><strong><span id="title">Important Label Heading</span></strong></p>
+        <p><span id="value">1</span></p>
+        <p><span id="country">country</span></p>
+    </div>
+
+</body>
+</html>
